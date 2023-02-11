@@ -153,9 +153,53 @@ namespace Eco.Mods.WorldEdit
 			{
 				Log.WriteError(Localizer.Do($"{e}"));
 			}
-		}
+        }
 
-		[ChatSubCommand("WorldEdit", "Duplicate the Selected Area based on repeating amounts to a direction", "stack", ChatAuthorizationLevel.Admin)]
+        [ChatSubCommand("WorldEdit", "Creates an cylinder on first point for type, width north south, width west east, height", "cyl", ChatAuthorizationLevel.Admin)]
+        public static void Cyl(User user, string typeName, int widthNorthSouth, int widthWestEast, int height = 1)
+        {
+            try
+            {
+                typeName = typeName.Replace(" ", "");
+                CylCommand command = new CylCommand(user, typeName, widthNorthSouth, widthWestEast, height, true);
+                if (command.Invoke())
+                {
+                    user.Player.MsgLoc($"{command.BlocksChanged} blocks changed.");
+                }
+            }
+            catch (WorldEditCommandException e)
+            {
+                user.Player.ErrorLocStr(e.Message);
+            }
+            catch (Exception e)
+            {
+                Log.WriteError(Localizer.Do($"{e}"));
+            }
+        }
+
+        [ChatSubCommand("WorldEdit", "Creates an hollow cylinder on first point for type, width north south, width west east, height", "hcyl", ChatAuthorizationLevel.Admin)]
+        public static void HCyl(User user, string typeName, int widthNorthSouth, int widthWestEast, int height = 1)
+        {
+            try
+            {
+                typeName = typeName.Replace(" ", "");
+                CylCommand command = new CylCommand(user, typeName, widthNorthSouth, widthWestEast, height, false);
+                if (command.Invoke())
+                {
+                    user.Player.MsgLoc($"{command.BlocksChanged} blocks changed.");
+                }
+            }
+            catch (WorldEditCommandException e)
+            {
+                user.Player.ErrorLocStr(e.Message);
+            }
+            catch (Exception e)
+            {
+                Log.WriteError(Localizer.Do($"{e}"));
+            }
+        }
+
+        [ChatSubCommand("WorldEdit", "Duplicate the Selected Area based on repeating amounts to a direction", "stack", ChatAuthorizationLevel.Admin)]
 		public static void Stack(User user, string directionAndAmount = "1", int offset = 0)
 		{
 			try
