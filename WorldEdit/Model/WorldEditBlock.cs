@@ -9,6 +9,7 @@ using Eco.Mods.WorldEdit.Serializer;
 using Eco.Mods.WorldEdit.Utils;
 using Eco.Shared;
 using Eco.Shared.IoC;
+using Eco.Shared.Localization;
 using Eco.Shared.Math;
 using Eco.Shared.Utils;
 using Eco.Simulation;
@@ -134,7 +135,7 @@ namespace Eco.Mods.WorldEdit.Model
 					float newAngle = MathF.Round((currentAngle + degrees) / 90) * 90;
 					newAngle = MathUtil.NormalizeAngle0to360(newAngle);
 
-					Type type = variants.Single(variant =>
+					Type type = variants.FirstOrDefault(variant =>
 					{
 						string angleStr = Regex.Match(variant.Name, @"\d+").Value;
 						if (string.IsNullOrEmpty(angleStr) && newAngle == 0) return true;
@@ -142,7 +143,22 @@ namespace Eco.Mods.WorldEdit.Model
 						return false;
 					});
 
-					if (type == null) { Log.Debug($"{this.BlockType.Name} new form: {type.Name}"); return; }
+					if(type is null) //Default number search not working, trying new name extraction based
+					{
+						string baseBlockName = variants[0].Name;
+						string baseName = baseBlockName.Substring(0, baseBlockName.LastIndexOf("Block"));
+						string plainCurName = this.BlockType.Name.Substring(0, this.BlockType.Name.LastIndexOf("Block"));
+						//Determine angle again
+						currentAngle = 0;
+						angleStr = plainCurName.Substring(baseName.Length);
+						if (!string.IsNullOrEmpty(angleStr)) { currentAngle = int.Parse(angleStr); }
+						newAngle = MathF.Round((currentAngle + degrees) / 90) * 90;
+						newAngle = MathUtil.NormalizeAngle0to360(newAngle);
+						//
+						string constructedName = $"{baseName}{(int)newAngle}Block";
+						type = variants.FirstOrDefault(v => v.Name == $"{baseName}{(int)newAngle}Block" || (newAngle == 0 && v.Name == baseBlockName));
+					}
+					if (type == null) { Log.WriteWarningLineLoc($"{this.BlockType.Name} unable to rotate this block!"); return; }
 					this.BlockType = type;
 				}
 			}
